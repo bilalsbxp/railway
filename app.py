@@ -1,23 +1,20 @@
-from flask import Flask, jsonify
+from flask import Flask
 import subprocess
 
 app = Flask(__name__)
 
-@app.route('/')
-def check_installation():
+# Perintah instalasi ffmpeg
+def install_ffmpeg():
     try:
-        # Cek versi yt-dlp
-        ytdlp_version = subprocess.check_output(["yt-dlp", "--version"]).decode().strip()
+        subprocess.run(["apt-get", "update"], check=True)
+        subprocess.run(["apt-get", "install", "-y", "ffmpeg"], check=True)
+        return "ffmpeg berhasil di install"
+    except subprocess.CalledProcessError as e:
+        return f"Gagal menginstal ffmpeg: {e}"
 
-        # Cek versi ffmpeg
-        ffmpeg_version = subprocess.check_output(["ffmpeg", "-version"]).decode().split('\n')[0]
-
-        return jsonify({
-            "yt-dlp": f"Terinstal (Versi: {ytdlp_version})",
-            "ffmpeg": f"Terinstal (Versi: {ffmpeg_version})"
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+@app.route('/')
+def home():
+    return install_ffmpeg()
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0', port=3000)
